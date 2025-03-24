@@ -1,6 +1,5 @@
-
 from rest_framework import serializers
-from .models import Recipe, Comment, SearchHistory, Favorite  # Добавили Favorite
+from .models import Recipe, Comment, SearchHistory, Favorite, RecentlyViewed
 from django.contrib.auth.models import User
 
 class UserSerializer(serializers.ModelSerializer):
@@ -20,7 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
 class RecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
-        fields = ['id', 'name', 'user', 'description', 'ingredients', 'image', 'cooking_time', 'calories']
+        fields = ['id', 'name', 'user', 'description', 'ingredients', 'image', 'cooking_time', 'calories', 'created_at']
         extra_kwargs = {'user': {'read_only': True}}
 
     def get_userCreated(self, obj):
@@ -48,3 +47,10 @@ class FavoriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Favorite
         fields = ['id', 'recipe', 'added_at']
+
+class RecentlyViewedSerializer(serializers.ModelSerializer):
+    recipe = RecipeSerializer(read_only=True)
+
+    class Meta:
+        model = RecentlyViewed
+        fields = ['id', 'recipe', 'viewed_at']

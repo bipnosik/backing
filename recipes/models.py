@@ -1,4 +1,3 @@
-# recipes/models.pysadsad
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -49,3 +48,15 @@ class Favorite(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.recipe.name}"
+
+class RecentlyViewed(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='recently_viewed')
+    recipe = models.ForeignKey('Recipe', on_delete=models.CASCADE)
+    viewed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-viewed_at']
+        unique_together = ['user', 'recipe']
+
+    def __str__(self):
+        return f"{self.user.username} viewed {self.recipe.name}"
