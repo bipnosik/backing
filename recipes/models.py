@@ -17,6 +17,7 @@ class Recipe(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField()
     ingredients = models.TextField()
+    instructions = models.TextField()
     image = models.ImageField(upload_to='recipes/', blank=True, null=True)
     cooking_time = models.IntegerField(default=25)
     calories = models.IntegerField(default=145)

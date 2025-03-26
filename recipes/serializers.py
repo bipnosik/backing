@@ -19,7 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
 class RecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
-        fields = ['id', 'name', 'user', 'description', 'ingredients', 'image', 'cooking_time', 'calories', 'created_at']
+        fields = ['id', 'name', 'user', 'description', 'ingredients', 'instructions','image', 'cooking_time', 'calories', 'created_at']
         extra_kwargs = {'user': {'read_only': True}}
 
     def get_userCreated(self, obj):
