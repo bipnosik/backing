@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     'recipes',
     'corsheaders',
 ]
-
+CORS_ALLOW_CREDENTIALS = True
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
