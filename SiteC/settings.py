@@ -100,10 +100,12 @@ WSGI_APPLICATION = 'SiteC.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
+BASE_DIR = Path(__file__).resolve().parent.parent
 DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///' + str(BASE_DIR / "db.sqlite3"))
 DATABASES = {
     'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
 }
+print(f"Using database: {DATABASES['default']['ENGINE']} at {DATABASES['default']['NAME']}")
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
