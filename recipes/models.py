@@ -16,9 +16,10 @@ class Recipe(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     name = models.CharField(max_length=200)
     description = models.TextField()
-    ingredients = models.TextField()
+    ingredients_list = models.JSONField(default=list)
     instructions = models.TextField(default='No instructions provided')
     image = models.ImageField(upload_to='recipes/', blank=True, null=True)
+    step_images = models.JSONField(default=list)
     cooking_time = models.IntegerField(default=25)
     calories = models.IntegerField(default=145)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -29,8 +30,16 @@ class Recipe(models.Model):
     class Meta:
         ordering = ['-created_at']
 
+class RecipeAttribute(models.Model):
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='attributes')  # Прямой импорт
+    name = models.CharField(max_length=100)
+    value = models.CharField(max_length=50)
+
+    def __str__(self):
+        return f"{self.name}: {self.value} for {self.recipe.name}"
+
 class Comment(models.Model):
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='comments')
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='comments')  # Прямой импорт
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -40,7 +49,7 @@ class Comment(models.Model):
 
 class Favorite(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    recipe = models.ForeignKey('Recipe', on_delete=models.CASCADE)  # Строковая ссылка
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)  # Прямой импорт
     added_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -52,7 +61,7 @@ class Favorite(models.Model):
 
 class RecentlyViewed(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='recently_viewed')
-    recipe = models.ForeignKey('Recipe', on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)  # Прямой импорт
     viewed_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
