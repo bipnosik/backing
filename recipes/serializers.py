@@ -41,11 +41,12 @@ class RecipeSerializer(serializers.ModelSerializer):
     return None
 
   def get_step_images(self, obj):
-    if obj.step_images:
-      request = self.context.get('request')
-      # Принудительно используем HTTPS для всех пошаговых изображений
-      return [request.build_absolute_uri(img).replace('http://', 'https://') if request else img for img in obj.step_images]
-    return []
+      print("Исходные step_images из модели:", obj.step_images)  # Отладка
+      if obj.step_images:
+          request = self.context.get('request')
+          return [request.build_absolute_uri(img).replace('http://', 'https://') if request else img for img in
+                  obj.step_images]
+      return []
 
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.ReadOnlyField(source='author.username')
