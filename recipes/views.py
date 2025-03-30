@@ -56,8 +56,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
             if step_image_key in request.FILES:
                 step_images.append(request.FILES[step_image_key])
 
-        print("Загруженные step_images:", [img.name for img in step_images])  # Отладка
-
         if 'step_images' in data:
             data.pop('step_images')
 
@@ -68,11 +66,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 recipe.image = request.FILES['image']
                 recipe.save()
 
-            # Сохраняем пошаговые изображения
             for img in step_images:
                 RecipeStepImage.objects.create(recipe=recipe, image=img)
 
-            # Сохраняем атрибуты
             for key, value in data.items():
                 if key.startswith('attribute_name_'):
                     idx = key.replace('attribute_name_', '')
