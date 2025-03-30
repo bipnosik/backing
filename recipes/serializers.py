@@ -1,6 +1,5 @@
-# SiteC/MeowSite/SiteC/recipes/serializers.py
 from rest_framework import serializers
-from .models import Recipe, Comment, SearchHistory, Favorite, RecentlyViewed, RecipeAttribute
+from .models import Recipe, Comment, SearchHistory, Favorite, RecentlyViewed, RecipeAttribute, RecipeStepImage
 from django.contrib.auth.models import User
 
 class UserSerializer(serializers.ModelSerializer):
@@ -22,31 +21,33 @@ class RecipeAttributeSerializer(serializers.ModelSerializer):
         model = RecipeAttribute
         fields = ['id', 'name', 'value']
 
+class RecipeStepImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RecipeStepImage
+        fields = ['image']
+
+    def to_representation(self, instance):
+        request = self.context.get('request')
+        if instance.image and request:
+            return request.build_absolute_uri(instance.image.url).replace('http://', 'https://')
+        return instance.image.url if instance.image else None
+
 class RecipeSerializer(serializers.ModelSerializer):
-  attributes = RecipeAttributeSerializer(many=True, read_only=True)
-  image = serializers.SerializerMethodField()
-  step_images = serializers.SerializerMethodField()
-  user = serializers.CharField(source='user.username', read_only=True)
+    attributes = RecipeAttributeSerializer(many=True, read_only=True)
+    step_images = RecipeStepImageSerializer(many=True, read_only=True)
+    image = serializers.SerializerMethodField()
+    user = serializers.CharField(source='user.username', read_only=True)
 
-  class Meta:
-    model = Recipe
-    fields = ['id', 'name', 'user', 'description', 'ingredients_list', 'instructions', 'image', 'step_images', 'cooking_time', 'calories', 'created_at', 'attributes']
-    extra_kwargs = {'user': {'read_only': True}}
+    class Meta:
+        model = Recipe
+        fields = ['id', 'name', 'user', 'description', 'ingredients_list', 'instructions', 'image', 'step_images', 'cooking_time', 'calories', 'created_at', 'attributes']
+        extra_kwargs = {'user': {'read_only': True}}
 
-  def get_image(self, obj):
-    if obj.image:
-      request = self.context.get('request')
-      # Принудительно используем HTTPS
-      return request.build_absolute_uri(obj.image.url).replace('http://', 'https://') if request else obj.image.url
-    return None
-
-  def get_step_images(self, obj):
-      print("Исходные step_images из модели:", obj.step_images)  # Отладка
-      if obj.step_images:
-          request = self.context.get('request')
-          return [request.build_absolute_uri(img).replace('http://', 'https://') if request else img for img in
-                  obj.step_images]
-      return []
+    def get_image(self, obj):
+        request = self.context.get('request')
+        if obj.image and request:
+            return request.build_absolute_uri(obj.image.url).replace('http://', 'https://')
+        return obj.image.url if obj.image else None
 
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.ReadOnlyField(source='author.username')

@@ -1,4 +1,3 @@
-# SiteC/MeowSite/SiteC/recipes/views.py
 from django.db.models import Q
 from rest_framework import viewsets, status, generics, permissions
 from rest_framework.response import Response
@@ -7,7 +6,7 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
-from .models import Recipe, Comment, SearchHistory, Favorite, RecentlyViewed, RecipeAttribute
+from .models import Recipe, Comment, SearchHistory, Favorite, RecentlyViewed, RecipeAttribute, RecipeStepImage
 from .serializers import (
     RecipeSerializer, UserSerializer, CommentSerializer,
     SearchHistorySerializer, FavoriteSerializer, RecentlyViewedSerializer
@@ -67,11 +66,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
             recipe = serializer.save(user=request.user)
             if 'image' in request.FILES:
                 recipe.image = request.FILES['image']
-            if step_images:
-                recipe.step_images = [f"/media/recipes/{img.name}" for img in step_images]
-            recipe.save()
-            print("Сохраненные step_images:", recipe.step_images)  # Отладка
+                recipe.save()
 
+            # Сохраняем пошаговые изображения
+            for img in step_images:
+                RecipeStepImage.objects.create(recipe=recipe, image=img)
+
+            # Сохраняем атрибуты
             for key, value in data.items():
                 if key.startswith('attribute_name_'):
                     idx = key.replace('attribute_name_', '')
@@ -108,11 +109,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
             recipe = serializer.save()
             if 'image' in request.FILES:
                 recipe.image = request.FILES['image']
-            if step_images:
-                recipe.step_images = [f"/media/recipes/{img.name}" for img in step_images]
-            recipe.save()
-            print("Сохраненные step_images:", recipe.step_images)  # Отладка
+                recipe.save()
 
+            # Удаляем старые пошаговые изображения и добавляем новые
+            if step_images:
+                recipe.step_images.all().delete()
+                for img in step_images:
+                    RecipeStepImage.objects.create(recipe=recipe, image=img)
+
+            # Обновляем атрибуты
             recipe.attributes.all().delete()
             for key, value in data.items():
                 if key.startswith('attribute_name_'):
@@ -152,7 +157,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         return Comment.objects.all()
 
 class SearchHistoryViewSet(viewsets.ModelViewSet):
-    queryset = SearchHistory.objects.all()  # Добавляем queryset
+    queryset = SearchHistory.objects.all()
     serializer_class = SearchHistorySerializer
     permission_classes = [IsAuthenticated]
 
@@ -182,7 +187,7 @@ class FavoriteDeleteView(generics.DestroyAPIView):
         return Favorite.objects.filter(user=self.request.user)
 
 class RecentlyViewedViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = RecentlyViewed.objects.all()  # Добавляем queryset
+    queryset = RecentlyViewed.objects.all()
     serializer_class = RecentlyViewedSerializer
     permission_classes = [IsAuthenticated]
 

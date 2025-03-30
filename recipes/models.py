@@ -13,25 +13,31 @@ class SearchHistory(models.Model):
         return f"{self.user.username}: {self.query}"
 
 class Recipe(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
-    name = models.CharField(max_length=200)
-    description = models.TextField()
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+    description = models.TextField(default='No description provided')
     ingredients_list = models.JSONField(default=list)
     instructions = models.TextField(default='No instructions provided')
-    image = models.ImageField(upload_to='recipes/', blank=True, null=True)
-    step_images = models.JSONField(default=list)
-    cooking_time = models.IntegerField(default=25)
-    calories = models.IntegerField(default=145)
+    image = models.ImageField(upload_to='recipes/', null=True, blank=True)
+    cooking_time = models.IntegerField(null=True, blank=True)
+    calories = models.IntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name
 
+class RecipeStepImage(models.Model):
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='step_images')
+    image = models.ImageField(upload_to='recipes/steps/')
+
+    def __str__(self):
+        return f"Step image for {self.recipe.name}"
+
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['id']  # Изменил с '-created_at' на 'id', так как поле created_at отсутствует
 
 class RecipeAttribute(models.Model):
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='attributes')  # Прямой импорт
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='attributes')
     name = models.CharField(max_length=100)
     value = models.CharField(max_length=50)
 
@@ -39,7 +45,7 @@ class RecipeAttribute(models.Model):
         return f"{self.name}: {self.value} for {self.recipe.name}"
 
 class Comment(models.Model):
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='comments')  # Прямой импорт
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='comments')
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -49,7 +55,7 @@ class Comment(models.Model):
 
 class Favorite(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)  # Прямой импорт
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     added_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -61,7 +67,7 @@ class Favorite(models.Model):
 
 class RecentlyViewed(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='recently_viewed')
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)  # Прямой импорт
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     viewed_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
