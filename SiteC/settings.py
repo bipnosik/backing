@@ -33,7 +33,11 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
     "meowsite-backend-production.up.railway.app",
 ]
-
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT = True  # Перенаправляет все HTTP-запросы на HTTPS
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+USE_X_FORWARDED_HOST = True
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
