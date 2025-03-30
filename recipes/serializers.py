@@ -1,5 +1,6 @@
+# SiteC/MeowSite/SiteC/recipes/serializers.py
 from rest_framework import serializers
-from .models import Recipe, Comment, SearchHistory, Favorite, RecentlyViewed
+from .models import Recipe, Comment, SearchHistory, Favorite, RecentlyViewed, RecipeAttribute
 from django.contrib.auth.models import User
 
 class UserSerializer(serializers.ModelSerializer):
@@ -16,17 +17,33 @@ class UserSerializer(serializers.ModelSerializer):
         )
         return user
 
+class RecipeAttributeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RecipeAttribute
+        fields = ['id', 'name', 'value']
+
 class RecipeSerializer(serializers.ModelSerializer):
+    attributes = RecipeAttributeSerializer(many=True, read_only=True)
+    image = serializers.SerializerMethodField()
+    step_images = serializers.SerializerMethodField()
+    user = serializers.CharField(source='user.username', read_only=True)
+
     class Meta:
         model = Recipe
-        fields = ['id', 'name', 'user', 'description', 'ingredients', 'instructions','image', 'cooking_time', 'calories', 'created_at']
+        fields = ['id', 'name', 'user', 'description', 'ingredients_list', 'instructions', 'image', 'step_images', 'cooking_time', 'calories', 'created_at', 'attributes']
         extra_kwargs = {'user': {'read_only': True}}
 
-    def get_userCreated(self, obj):
-        request = self.context.get('request')
-        if request and hasattr(request, 'user'):
-            return obj.user == request.user
-        return False
+    def get_image(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            return request.build_absolute_uri(obj.image.url) if request else obj.image.url
+        return None
+
+    def get_step_images(self, obj):
+        if obj.step_images:
+            request = self.context.get('request')
+            return [request.build_absolute_uri(img) if request else img for img in obj.step_images]
+        return []
 
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.ReadOnlyField(source='author.username')
