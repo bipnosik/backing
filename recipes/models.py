@@ -17,6 +17,7 @@ class Recipe(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(default='No description provided')
     ingredients_list = models.JSONField(default=list)
+    step_instructions = models.JSONField(default=list)
     instructions = models.TextField(default='No instructions provided')
     image = models.ImageField(upload_to='recipes/', null=True, blank=True)
     cooking_time = models.IntegerField(null=True, blank=True)
@@ -29,6 +30,7 @@ class Recipe(models.Model):
 class RecipeStepImage(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='step_images')
     image = models.ImageField(upload_to='recipes/steps/')
+
 
     def __str__(self):
         return f"Step image for {self.recipe.name}"
