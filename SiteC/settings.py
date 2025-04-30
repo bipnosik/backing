@@ -108,7 +108,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///' + str(BASE_DIR / "db.sqlite3"))
 print(f"DEBUG: DATABASE_URL = {DATABASE_URL}")  # Для отладки
 DATABASES = {
-    'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'railway',
+        'USER': 'postgres',
+        'PASSWORD': 'AVmZwABOnsHzbPffnbpuXRkPwSzUePSj',
+        'HOST': 'postgres.railway.internal',
+        'PORT': '5432',
+    }
 }
 print(f"Using database: {DATABASES['default']['ENGINE']} at {DATABASES['default']['NAME']}")
 
