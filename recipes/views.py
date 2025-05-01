@@ -51,11 +51,24 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         data = request.data.copy()
         step_images = []
+        step_instructions = []
+
+        # Собираем пошаговые изображения
         for i in range(10):
             step_image_key = f'step_image_{i}'
             if step_image_key in request.FILES:
                 step_images.append(request.FILES[step_image_key])
 
+        # Собираем пошаговые инструкции
+        for i in range(10):
+            step_instruction_key = f'step_instruction_{i}'
+            if step_instruction_key in request.POST:
+                step_instructions.append(request.POST[step_instruction_key])
+
+        # Добавляем step_instructions в data
+        data['step_instructions'] = step_instructions
+
+        # Удаляем step_images из data, так как они обрабатываются отдельно
         if 'step_images' in data:
             data.pop('step_images')
 
@@ -66,9 +79,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 recipe.image = request.FILES['image']
                 recipe.save()
 
+            # Сохраняем пошаговые изображения
             for img in step_images:
                 RecipeStepImage.objects.create(recipe=recipe, image=img)
 
+            # Обрабатываем атрибуты
             for key, value in data.items():
                 if key.startswith('attribute_name_'):
                     idx = key.replace('attribute_name_', '')
@@ -79,7 +94,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
             response_serializer = self.serializer_class(recipe, context={'request': request})
             return Response(response_serializer.data, status=status.HTTP_201_CREATED)
-        print(serializer.errors)
+        print("Ошибки сериализатора:", serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, pk=None, *args, **kwargs):
@@ -90,13 +105,24 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
         data = request.data.copy()
         step_images = []
+        step_instructions = []
+
+        # Собираем пошаговые изображения
         for i in range(10):
             step_image_key = f'step_image_{i}'
             if step_image_key in request.FILES:
                 step_images.append(request.FILES[step_image_key])
 
-        print("Загруженные step_images:", [img.name for img in step_images])  # Отладка
+        # Собираем пошаговые инструкции
+        for i in range(10):
+            step_instruction_key = f'step_instruction_{i}'
+            if step_instruction_key in request.POST:
+                step_instructions.append(request.POST[step_instruction_key])
 
+        # Добавляем step_instructions в data
+        data['step_instructions'] = step_instructions
+
+        # Удаляем step_images из data
         if 'step_images' in data:
             data.pop('step_images')
 
@@ -125,7 +151,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
             response_serializer = self.serializer_class(recipe, context={'request': request})
             return Response(response_serializer.data)
-        print(serializer.errors)
+        print("Ошибки сериализатора:", serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, pk=None, *args, **kwargs):
