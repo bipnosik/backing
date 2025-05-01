@@ -49,6 +49,53 @@ class RecipeSerializer(serializers.ModelSerializer):
             return request.build_absolute_uri(obj.image.url).replace('http://', 'https://')
         return obj.image.url if obj.image else None
 
+    def create(self, validated_data):
+        request = self.context.get('request')
+        step_instructions = []
+        for i in range(10):
+            key = f'step_instruction_{i}'
+            if key in request.FILES or key in request.POST:
+                step_instructions.append(request.POST[key])
+        validated_data['step_instructions'] = step_instructions
+
+        recipe = Recipe.objects(**validated_data)
+
+        for i in range(10):
+            key = f'step_image{i}'
+            if key in request.FILES:
+                RecipeStepImage.objects.create(
+                    recipe=recipe,
+                    image=request.FILES[key]
+                )
+        return recipe
+
+
+    def update(self, instance, validated_data):
+        request = self.context.get('request')
+        if request:
+            step_instructions = []
+            for i in range(10):
+                key = f'step_instruction_{i}'
+                if key in request.FILES or key in request.POST:
+                    step_instructions.append(request.POST[key])
+            validated_data['step_instructions'] = step_instructions
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        if request and any(f'step_image_{i}' in request.FILES for i in range(10)):
+            instance.step_images.all().delete()
+            for i in range(10):
+                key = f'step_image_{i}'
+                if key in request.FILES:
+                    RecipeStepImage.objects.create(
+                        recipe=instance,
+                        image=request.FILES[key]
+                    )
+        return instance
+
+
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.ReadOnlyField(source='author.username')
 
