@@ -106,7 +106,7 @@ WSGI_APPLICATION = 'SiteC.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///' + str(BASE_DIR / "db.sqlite3"))
-print(f"DEBUG: DATABASE_URL = {DATABASE_URL}")  # Для отладки
+print(f"DEBUG: DATABASE_URL = {DATABASE_URL}")
 DATABASES = {
     'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
 }

@@ -40,7 +40,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = ['id', 'name', 'user', 'description', 'ingredients_list', 'instructions', 'image', 'step_images', 'cooking_time', 'calories', 'created_at', 'attributes']
+        fields = ['id', 'name', 'user', 'description', 'ingredients_list', 'instructions', 'image', 'step_images', 'step_instructions', 'cooking_time', 'calories', 'created_at', 'attributes']
         extra_kwargs = {'user': {'read_only': True}}
 
     def get_image(self, obj):
