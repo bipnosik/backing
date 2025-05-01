@@ -11,6 +11,7 @@ from .serializers import (
     RecipeSerializer, UserSerializer, CommentSerializer,
     SearchHistorySerializer, FavoriteSerializer, RecentlyViewedSerializer
 )
+import json
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
@@ -66,7 +67,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 step_instructions.append(request.POST[step_instruction_key])
 
         # Добавляем step_instructions в data
-        data['step_instructions'] = step_instructions
+        data['step_instructions'] = json.dumps(step_instructions, ensure_ascii=False)
 
         # Удаляем step_images из data, так как они обрабатываются отдельно
         if 'step_images' in data:
