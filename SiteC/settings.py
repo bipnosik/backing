@@ -32,7 +32,6 @@ ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
     "meowsite-backend-production.up.railway.app",
-    "postgresql://postgres:HZjTuDLYNWbKPDXorFZMSARJdAEAyyIk@postgres.railway.internal:5432/railway",
 ]
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_SSL_REDIRECT = True  # Перенаправляет все HTTP-запросы на HTTPS
